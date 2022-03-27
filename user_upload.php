@@ -36,7 +36,7 @@ If (!isset($options[ "create_table" ])) { //skip file processing if --create_tab
       echo "---File processing begin:".PHP_EOL; // script info message
       $filePath = $options["file"]; // if --file parameter is not empty
       if (strpos($filePath,'[') === 0 && strpos($filePath,']') === strlen($filePath) - 1) {
-          $filePath = substr($file_path,1,strlen($filePath)-2);
+          $filePath = substr($filePath,1,strlen($filePath)-2);
       }
   }
 
@@ -118,6 +118,7 @@ If (!isset($options[ "create_table" ])) { //skip file processing if --create_tab
 // Collecting database connection parameters
 [$dbUser, $dbPassword, $dbHost, $dbName] = get_dbconnection_params($options, ['u','p','h','n']);
 
+// Checking the connection parameters and requesting user input if required
 $dbUser = check_connection_params_value('Username', $dbUser);
 $dbPassword = check_connection_params_value('Password', $dbPassword);
 $dbHost = check_connection_params_value('Host', $dbHost);
@@ -126,12 +127,7 @@ $dbName = check_connection_params_value('DB Name', $dbName);
 /* Checking "host" format as "host:port" or "host" only and assigning values*/
 [$dbHost, $dbPort] = get_host_port_split($dbHost);
 
-// echo "username: " . $dbUser . ", "
-//     ."password: " . $dbPassword . ", "
-//     ."host: " . $dbHost . ", "
-//     ."port: " . $dbPort . ", "
-//     ."database: " . $dbName . PHP_EOL;
-
+// Establishing DB connection
 $dbConnection = mysqli_connect($dbHost,$dbUser,$dbPassword,$dbName,$dbPort)
 or die("ATTENTION: The database has returned error:".mysqli_connect_error().PHP_EOL
       ."Unable to establish database connection".PHP_EOL);
@@ -140,11 +136,12 @@ echo ($dbConnection->select_db($dbName)) ? "DB connection established successful
     .$dbName.PHP_EOL : "The database is not specified!".PHP_EOL;
 
 // Checking whether the 'users' table on specified schema exists
-$usersTableExists = is_null(check_table_in_db($dbConnection, $dbName));
+$usersTableNotExist = is_null(check_table_in_db($dbConnection, $dbName));
 
+/* --- PERFORMING --create_table COMMAND --- */
 if (isset($options[ "create_table" ])) {
 
-  if ($usersTableExists) { // if users table does not exist in selected schema (database)
+  if ($usersTableNotExist) { // if users table does not exist in selected schema (database)
     /* Forming a "create table" query */
     $queryCreateTable = "CREATE TABLE IF NOT EXISTS $dbName.users (
     id serial PRIMARY KEY NOT NULL,
@@ -152,9 +149,10 @@ if (isset($options[ "create_table" ])) {
     u_surname VARCHAR(50) NOT NULL,
     email VARCHAR(350) UNIQUE NOT NULL);";
 
+    //executing CREATE TABLE query
     $dbConnection->select_db($dbName);
     if ($dbConnection->query($queryCreateTable) === true) {
-      echo "Table 'users' on schema '$dbName' created successfully".PHP_EOL;
+      echo "Table 'users' on schema '$dbName' created successfully.".PHP_EOL;
     }
     else {
       echo "Error creating table: " . $dbConnection->error.PHP_EOL;
@@ -168,11 +166,42 @@ if (isset($options[ "create_table" ])) {
   }
 }
 
-// $dbConnection->begin_transaction();
-// $dbConnection->commit();
-// $dbConnection->rollback();
+/*  --- INSERTING DATA FROM FILE INTO DATABASE --- */
 
-//mysqli_query(mysqli $mysql, string $query, int $result_mode = MYSQLI_STORE_RESULT): mysqli_result|bool
+if ($usersTableNotExist) {
+  exit(TABLE_NOT_EXIST_MESSAGE);
+}
+else {
+  $cnt_rec = 0;
+  foreach ($file as $record) {
+    if ($record[3]) {
+      //if email has correct format
+      if (is_null(check_email_exist($dbConnection, $dbName, $record[2]))) {
+        // and it doesn't exist in table (UNIQUE_KEY)
+
+        $dbConnection->begin_transaction(); //STARTING TRANSACTION
+
+        // preparing insert expression
+        $queryInsertUser = "INSERT INTO $dbName.users (u_name, u_surname, email)
+        VALUES (\"$record[0]\",\"$record[1]\",\"$record[2]\")";
+        // inserting data
+        if ($dbConnection->query($queryInsertUser) === true) {
+          $cnt_rec++;
+          $dbConnection->commit(); // commit on successfull insert
+          echo "The user with ".$record[2]." email inserted into the database".PHP_EOL;
+        }
+        else {
+          $dbConnection->rollback(); // rollback otherwise
+          echo "SOMETHING WENT WRONG: ".$dbConnection->error.PHP_EOL;
+        }
+      }
+      else {
+        echo "Email '". $record[2] . "' already exists in 'users' table".PHP_EOL;
+      }
+    }
+  }
+  echo "The script has been executed successfully. $cnt_rec records inserted into the database" . PHP_EOL;
+}
 
 mysqli_close($dbConnection); // Make sure we closed the connection to the database
 ?>
