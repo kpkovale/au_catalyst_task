@@ -164,4 +164,13 @@ function request_password_obscured($prompt='') {
     return $strHidden;
 }
 
+function check_table_in_db($dbConnection, $dbName) {
+  $queryFindTable = "SELECT table_name FROM information_schema.tables
+                     WHERE table_schema='$dbName' AND table_name='users';";
+  $selectResult = $dbConnection->query($queryFindTable);
+  $selectResult->data_seek($selectResult->num_rows - 1);
+  $rowSelect = $selectResult->fetch_array()[0];
+  return $rowSelect;
+}
+
 ?>
