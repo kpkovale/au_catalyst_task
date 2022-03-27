@@ -88,5 +88,44 @@ function get_dbconnection_params($optionsArray, $paramKeys){
   return $dbConnectionParamsArray;
 }
 
+function check_connection_params_value($paramName='',$paramValue) {
+
+  /* checks for mandatory parameters' values and requests input for empy ones */
+
+  $defaultValue = '';
+  $functionToCall = 'readline';
+  switch (strtolower($paramName)) {
+    case 'username':
+      $defaultValue = 'root';
+      $functionToCall = 'readline';
+      break;
+    case 'password':
+      $defaultValue = ' ';
+      $functionToCall = 'readline';
+      break;
+    case 'host':
+      $defaultValue = '127.0.0.1:3306';
+      $functionToCall = 'readline';
+      break;
+    case 'db name':
+      $defaultValue = 'test';
+      $functionToCall = 'readline';
+      break;
+    default:
+      exit("Unable to recognize parameter name $paramName \n");
+      break;
+}
+    while (!$paramValue) {
+      echo "Parameter \"$paramName\" is not set while required".PHP_EOL;
+      $userPick = readline("\"Y/y\" to set new value OR \"N/n\" for default ($defaultValue): ");
+      if (strtoupper($userPick) === "Y") {
+        $paramValue = call_user_func($functionToCall, "Enter $paramName: ");
+      }
+      elseif (strtoupper($userPick) === "N") {
+        $paramValue = $defaultValue;
+      }
+  }
+      return $paramValue;
+}
 
 ?>
