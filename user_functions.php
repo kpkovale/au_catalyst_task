@@ -101,7 +101,7 @@ function check_connection_params_value($paramName='',$paramValue) {
       break;
     case 'password':
       $defaultValue = ' ';
-      $functionToCall = 'readline';
+      $functionToCall = 'request_password_obscured';
       break;
     case 'host':
       $defaultValue = '127.0.0.1:3306';
@@ -135,6 +135,33 @@ function get_host_port_split($hostString) {
     $dbPort = $dbHostPort[ 1 ];
     return array($dbHost,$dbPort);
   } else return array($hostString,NULL);
+}
+
+function request_password_obscured($prompt='') {
+
+    // function hides output
+    // and returns string entered in terminal
+
+    readline_callback_handler_install('', function(){});
+    if (isset($prompt)) {
+      echo $prompt."\n";
+    }
+    //echo("Password: ");
+    $strHidden = '';
+    while (True) {
+      $strChar = stream_get_contents(STDIN, 1);
+      if ($strChar === chr(10)) {
+        break;
+      }
+      elseif (($strChar===chr(127)) && (strlen($strHidden)!=0)) {
+        $strHidden = rtrim($strHidden, $strHidden[strlen($strHidden)-1]);
+      }
+      else {
+        $strHidden .= $strChar;
+      }
+    }
+    readline_callback_handler_remove();
+    return $strHidden;
 }
 
 ?>
