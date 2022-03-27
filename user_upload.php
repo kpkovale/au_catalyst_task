@@ -28,7 +28,7 @@ if (isset($options["dry_run"])) {
 } else $isDryRun = false;
 
 /* --- *.csv file processing block --- */
-If (!isset($options[ "create_table" ])) {
+If (!isset($options[ "create_table" ])) { //skip file processing if --create_table given
   if (!isset($options["file"]) || empty($options["file"])) {
       exit(NEED_FILE_MESSAGE);
   }
@@ -72,7 +72,7 @@ If (!isset($options[ "create_table" ])) {
                 $delimiterPosition = strpos($file[$i][$j],"-");
               }
 
-              // checking for the apostrophe or the dash in the name
+              // checking for the apostrophe or the dash in the name/surname
               if ($delimiterPosition === false) {
                 $file[$i][$j] = trim(strtoupper(substr($file[$i][$j], 0, 1))
                                 .strtolower(substr($file[$i][$j], 1))
@@ -85,11 +85,9 @@ If (!isset($options[ "create_table" ])) {
                                 .strtolower(substr($file[$i][$j], $delimiterPosition+2))
                                 );
               }
-
               //Removing extra characters from Names and Surnames
               // except for letters and dash or apostrophe in the middle
               $file[$i][$j] = str_replace(preg_filter($regexpPattern,'',$file[$i][$j]),'',$file[$i][$j]);
-
           }
       }
 
@@ -113,21 +111,11 @@ If (!isset($options[ "create_table" ])) {
   echo "---File processing end.",PHP_EOL;
 }
 
-/* --- NOW CHECHINK FOR DRY_RUN MODE --- */
+/* --- CHECKING FOR DRY_RUN MODE --- */
 /* -- No DataBase alteration with this option should be performed -- */
   ($isDryRun) ? exit(DRY_RUN_EXIT_MESSAGE.$emailCount.PHP_EOL) : NULL;
 
-
-
-// mysqli_connect(
-//     string $hostname = ini_get("mysqli.default_host"),
-//     string $username = ini_get("mysqli.default_user"),
-//     string $password = ini_get("mysqli.default_pw"),
-//     string $database = "",
-//     int $port = ini_get("mysqli.default_port"),
-//     string $socket = ini_get("mysqli.default_socket")
-// ): mysqli|false
-
+// Collecting database connection parameters
 [$dbUser, $dbPassword, $dbHost, $dbName] = get_dbconnection_params($options, ['u','p','h','n']);
 
 $dbUser = check_connection_params_value('Username', $dbUser);
@@ -135,16 +123,14 @@ $dbPassword = check_connection_params_value('Password', $dbPassword);
 $dbHost = check_connection_params_value('Host', $dbHost);
 $dbName = check_connection_params_value('DB Name', $dbName);
 
-
 /* Checking "host" format as "host:port" or "host" only and assigning values*/
 [$dbHost, $dbPort] = get_host_port_split($dbHost);
 
-echo "username: " . $dbUser . ", "
-    ."password: " . $dbPassword . ", "
-    ."host: " . $dbHost . ", "
-    ."port: " . $dbPort . ", "
-    ."database: " . $dbName . PHP_EOL;
-
+// echo "username: " . $dbUser . ", "
+//     ."password: " . $dbPassword . ", "
+//     ."host: " . $dbHost . ", "
+//     ."port: " . $dbPort . ", "
+//     ."database: " . $dbName . PHP_EOL;
 
 $dbConnection = mysqli_connect($dbHost,$dbUser,$dbPassword,$dbName,$dbPort)
 or die("ATTENTION: The database has returned error:".mysqli_connect_error().PHP_EOL
@@ -152,18 +138,41 @@ or die("ATTENTION: The database has returned error:".mysqli_connect_error().PHP_
 
 echo ($dbConnection->select_db($dbName)) ? "DB connection established successfully: "
     .$dbName.PHP_EOL : "The database is not specified!".PHP_EOL;
-// echo $dbConnection->client_info.PHP_EOL;
-// $dbConnection->begin_transaction;
-//$dbConnection->commit;
-// mysqli_query(mysqli $mysql, string $query, int $result_mode = MYSQLI_STORE_RESULT): mysqli_result|bool
-              /* Forming a "create table" query */
-              $queryCreateTable = "CREATE TABLE IF NOT EXISTS $dbName.users (
-              id serial PRIMARY KEY NOT NULL,
-              u_name VARCHAR(50) NOT NULL,
-              u_surname VARCHAR(50) NOT NULL,
-              email VARCHAR(350) UNIQUE NOT NULL);";
+
+// Checking whether the 'users' table on specified schema exists
+$usersTableExists = is_null(check_table_in_db($dbConnection, $dbName));
+
+if (isset($options[ "create_table" ])) {
+
+  if ($usersTableExists) { // if users table does not exist in selected schema (database)
+    /* Forming a "create table" query */
+    $queryCreateTable = "CREATE TABLE IF NOT EXISTS $dbName.users (
+    id serial PRIMARY KEY NOT NULL,
+    u_name VARCHAR(50) NOT NULL,
+    u_surname VARCHAR(50) NOT NULL,
+    email VARCHAR(350) UNIQUE NOT NULL);";
+
+    $dbConnection->select_db($dbName);
+    if ($dbConnection->query($queryCreateTable) === true) {
+      echo "Table 'users' on schema '$dbName' created successfully".PHP_EOL;
+    }
+    else {
+      echo "Error creating table: " . $dbConnection->error.PHP_EOL;
+    }
+    mysqli_close($dbConnection); //close the connection
+    exit(); //finish script execution
+  }
+  else { // if the table exists
+    mysqli_close($dbConnection); //close the connection
+    exit("Table 'users' already exists on '$dbName' schema".PHP_EOL); //finish script execution
+  }
+}
+
+// $dbConnection->begin_transaction();
+// $dbConnection->commit();
+// $dbConnection->rollback();
 
 //mysqli_query(mysqli $mysql, string $query, int $result_mode = MYSQLI_STORE_RESULT): mysqli_result|bool
 
-mysqli_close($dbConnection);
+mysqli_close($dbConnection); // Make sure we closed the connection to the database
 ?>
