@@ -32,5 +32,6 @@ Please use --help to see the set of commands available.
 EOD;
 
 const DRY_RUN_MESSAGE = "ATTENTION! Script is running in a DRY_RUN mode." . PHP_EOL;
-const NEED_FILE_MESSAGE = "Script defined exception: File path or file name is required. Please restart the script using correct parameters".PHP_EOL
+const NEED_FILE_MESSAGE = "Script defined exception: File path or file name is required. Please restart the script using correct parameters".PHP_EOL;
+const USE_HELP_MESSAGE = "Use --help to check the list of available commands.".PHP_EOL;
 ?>
