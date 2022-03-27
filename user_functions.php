@@ -165,9 +165,22 @@ function request_password_obscured($prompt='') {
 }
 
 function check_table_in_db($dbConnection, $dbName) {
+  //Returns table_name if the table exists of null otherwise
+
   $queryFindTable = "SELECT table_name FROM information_schema.tables
                      WHERE table_schema='$dbName' AND table_name='users';";
   $selectResult = $dbConnection->query($queryFindTable);
+  $selectResult->data_seek($selectResult->num_rows - 1);
+  $rowSelect = $selectResult->fetch_array()[0];
+  return $rowSelect;
+}
+
+function check_email_exist($dbConnection, $dbName, $email) {
+  // Returns EMAIL if exists or NULL otherwise
+
+  $queryFindEmail = "SELECT email FROM $dbName.users
+                     WHERE email=\"$email\"";
+  $selectResult = $dbConnection->query($queryFindEmail);
   $selectResult->data_seek($selectResult->num_rows - 1);
   $rowSelect = $selectResult->fetch_array()[0];
   return $rowSelect;
