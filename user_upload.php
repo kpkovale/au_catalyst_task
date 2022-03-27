@@ -113,6 +113,12 @@ If (!isset($options[ "create_table" ])) {
   echo "---File processing end.",PHP_EOL;
 }
 
+/* --- NOW CHECHINK FOR DRY_RUN MODE --- */
+/* -- No DataBase alteration with this option should be performed -- */
+  ($isDryRun) ? exit(DRY_RUN_EXIT_MESSAGE.$emailCount.PHP_EOL) : NULL;
+
+
+
 // mysqli_connect(
 //     string $hostname = ini_get("mysqli.default_host"),
 //     string $username = ini_get("mysqli.default_user"),
@@ -124,19 +130,29 @@ If (!isset($options[ "create_table" ])) {
 
 [$dbUser, $dbPassword, $dbHost, $dbName] = get_dbconnection_params($options, ['u','p','h','n']);
 
-echo $dbUser . ", ". $dbPassword . ", ". $dbHost . ", ". $dbName . PHP_EOL;
+$dbUser = check_connection_params_value('Username', $dbUser);
+$dbPassword = check_connection_params_value('Password', $dbPassword);
+$dbHost = check_connection_params_value('Host', $dbHost);
+$dbName = check_connection_params_value('DB Name', $dbName);
 
-// mysqli_query(mysqli $mysql, string $query, int $result_mode = MYSQLI_STORE_RESULT): mysqli_result|bool
 
-$dbConnection = mysqli_connect($dbHost,$dbUser,$dbPassword,$dbName)
-or die("ATTENTION: The database has returned error:".mysqli_connect_error()."\"
-Unable to establish database connection".PHP_EOL);
+echo "username: " . $dbUser . ", "
+    ."password: " . $dbPassword . ", "
+    ."host: " . $dbHost . ", "
+    ."port: " . $dbPort . ", "
+    ."database: " . $dbName . PHP_EOL;
 
-echo "DB connection established successfully: ".$dbConnection->client_info.PHP_EOL;
+
+$dbConnection = mysqli_connect($dbHost,$dbUser,$dbPassword,$dbName,$dbPort)
+or die("ATTENTION: The database has returned error:".mysqli_connect_error().PHP_EOL
+      ."Unable to establish database connection".PHP_EOL);
+
+echo ($dbConnection->select_db($dbName)) ? "DB connection established successfully: "
+    .$dbName.PHP_EOL : "The database is not specified!".PHP_EOL;
 // echo $dbConnection->client_info.PHP_EOL;
 // $dbConnection->begin_transaction;
 //$dbConnection->commit;
-
+// mysqli_query(mysqli $mysql, string $query, int $result_mode = MYSQLI_STORE_RESULT): mysqli_result|bool
               /* Forming a "create table" query */
               $queryCreateTable = "CREATE TABLE IF NOT EXISTS $dbName.users (
               id serial PRIMARY KEY NOT NULL,
