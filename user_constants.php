@@ -31,11 +31,15 @@ Script options are not specified.
 Please use --help to see the set of commands available.
 EOD;
 
+const DRY_RUN_EXIT_MESSAGE = <<<EOD
+The script has been executed successfully.
+The amount of valid user records prepared to be inserted into the database is:
+EOD;
+
 const DRY_RUN_MESSAGE = "ATTENTION! Script is running in a DRY_RUN mode." . PHP_EOL;
 const NEED_FILE_MESSAGE = "Script defined exception: File path or file name is required. Please restart the script using correct parameters".PHP_EOL;
 const USE_HELP_MESSAGE = "Use --help to check the list of available commands.".PHP_EOL;
-const DRY_RUN_EXIT_MESSAGE = <<<EOD
-The script has been executed successfully.
-The amount of valid user records prepared to be inserted into the database is: 
-EOD;
+const TABLE_NOT_EXIST_MESSAGE = "There is no 'users' table in the specified database to insert data.
+Please create table first using --create_table parameter".PHP_EOL;
+
 ?>
