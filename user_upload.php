@@ -136,6 +136,9 @@ $dbHost = check_connection_params_value('Host', $dbHost);
 $dbName = check_connection_params_value('DB Name', $dbName);
 
 
+/* Checking "host" format as "host:port" or "host" only and assigning values*/
+[$dbHost, $dbPort] = get_host_port_split($dbHost);
+
 echo "username: " . $dbUser . ", "
     ."password: " . $dbPassword . ", "
     ."host: " . $dbHost . ", "
