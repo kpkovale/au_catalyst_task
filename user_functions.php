@@ -49,6 +49,10 @@ Use --help to check the list of available commands.".PHP_EOL;
           $end_cicle = 1;
           break;
       }
+        elseif ($given_arg === "--".$option_key."=".$option_value) {
+          $end_cicle = 1;
+          break;
+    }
     }
       if ($i == count($options) && $end_cicle == 0) {
       $err_msg =
