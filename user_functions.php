@@ -128,4 +128,13 @@ function check_connection_params_value($paramName='',$paramValue) {
       return $paramValue;
 }
 
+function get_host_port_split($hostString) {
+  if (strpos($hostString, ':') !== false) {
+    $dbHostPort = explode(':', $hostString);
+    $dbHost = $dbHostPort[ 0 ];
+    $dbPort = $dbHostPort[ 1 ];
+    return array($dbHost,$dbPort);
+  } else return array($hostString,NULL);
+}
+
 ?>
