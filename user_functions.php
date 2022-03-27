@@ -40,29 +40,53 @@ Use --help to check the list of available commands.".PHP_EOL;
         if ($given_arg === "-".$option_key || $given_arg === "--".$option_key) {
           $end_cicle = 1;
           break;
-      }
+        }
         elseif ($given_arg === $option_value) {
           $end_cicle = 1;
           break;
-      }
+        }
         elseif ($given_arg === "-".$option_key."=".$option_value) {
           $end_cicle = 1;
           break;
-      }
+        }
         elseif ($given_arg === "--".$option_key."=".$option_value) {
           $end_cicle = 1;
           break;
-    }
+        }
     }
       if ($i == count($options) && $end_cicle == 0) {
-      $err_msg =
-"The argument \"".$given_arg."\" does not correspond to any available command.
-Use --help to check the list of available commands.".PHP_EOL;
-      return [False, $err_msg];
+        if (strlen($given_arg) === 2 && strpos($given_arg,"-") !== false) {
+          $err_msg = "The argument \"".$given_arg."\" requires a vallue to be assigned."
+                     . PHP_EOL. USE_HELP_MESSAGE;
+          return [False, $err_msg];
+        }
+        else {
+          $err_msg = "The argument \"".$given_arg."\" does not correspond to any available command."
+                     . PHP_EOL. USE_HELP_MESSAGE;
+          return [False, $err_msg];
+        }
+
       }
     }
   }
   return [True, '']; // return True if no mistakes found
 }
+
+function get_dbconnection_params($optionsArray, $paramKeys){
+
+  /* funcion returns array of values from array by given keys */
+
+  $dbConnectionParamsArray = array();
+  foreach ($paramKeys as $keyName) {
+    if (isset($optionsArray[$keyName])) {
+      $dbConnectionParamsArray[] = $optionsArray[$keyName];
+    }
+    else {
+      $dbConnectionParamsArray[] = '' ;
+    }
+  }
+  return $dbConnectionParamsArray;
+}
+
 
 ?>
