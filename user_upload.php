@@ -5,7 +5,7 @@ require_once 'user_constants.php';
 require_once 'user_functions.php';
 
 // setting reporting level to ERROR to avoid unnecessary WARNINGS
-error_reporting(E_ERROR);
+//error_reporting(E_ERROR);
 
 $shortopts = "u:p::h:n:";
 $longopts = ["file:","create_table","dry_run","help"];
@@ -41,24 +41,43 @@ If (!isset($options[ "create_table" ])) { //skip file processing if --create_tab
   }
 
   /*   --- if file parameter is handled on run --> reading file and validating data ---   */
-  if ($filePath != null) {
+  if ($filePath !== null) {
       /*   --- inserting file data into array ---   */
-      $fileLinesArray = file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+      if (file_exists($filePath)) {
+        $fileLinesArray = file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+      }
+      else exit("File $filePath not found. Try using another file name".PHP_EOL);
 
-      if ($fileLinesArray === false) {
-        exit("file \"$filePath\" is empty or not exists. No records were found. Please try another file.\n");
+      if (empty($fileLinesArray)) {
+        exit("file \"$filePath\" is empty or does not exist. No records were found. Please, try another file.\n");
       }
 
+      //defining delimiter: either "," or ";"
+      $columnsDelimiter = (strpos($fileLinesArray[0],',') !== false) ? "," : ";";
+      ECHO "First line delimiter is '$columnsDelimiter' and is set as default for current file".PHP_EOL;
+
       // checking for the header in file
-      // if the 1st line has the ",surname," in it
-      if (str_replace(" ", "", strpos($fileLinesArray[0],',surname,')) !== false) {
-        array_splice($fileLinesArray, 0, 1); //remove the line
+      // if the 1st line has the substring ",surname," in it
+      if (strpos(str_replace(" ", "", $fileLinesArray[0]),$columnsDelimiter."surname".$columnsDelimiter) !== false) {
+        array_splice($fileLinesArray, 0, 1); //remove the header line
+        // if the file has had the header only - show message and terminate the script
+        if (empty($fileLinesArray)) exit($filePath.": ".FILE_IS_EMPTY_MESSAGE);
       }
 
       //creating an array with the insert data
       for ($i = 0; $i < count($fileLinesArray); $i++) {
-          $file[$i] = explode(",", $fileLinesArray[$i]);
+          $file[] = explode($columnsDelimiter, $fileLinesArray[$i]);
       }
+
+      // removing rows that lack fields
+      $rowsCountRemoved = 0;
+      for ($i=0; $i < count($file); $i++) {
+        if (count($file[$i]) < 3) { // if lacking columns (name, surname, email)
+          array_splice($file, $i, 1);
+          $rowsCountRemoved++;
+        }
+      }
+      echo "$rowsCountRemoved record(s) was(were) deleted because of lacking fields".PHP_EOL;
 
       /*  --- Setting name and surnames to start from Capital letter and lowering other letters ---   */
       $regexpPattern = '/[A-z]+(\'|-)[A-z]+|[A-z]+/';
