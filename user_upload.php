@@ -77,6 +77,7 @@ If (!isset($options[ "create_table" ])) { //skip file processing if --create_tab
           $rowsCountRemoved++;
         }
       }
+      if ($rowsCountRemoved > 0)
       echo "$rowsCountRemoved record(s) was(were) deleted because of lacking fields".PHP_EOL;
 
       /*  --- Setting name and surnames to start from Capital letter and lowering other letters ---   */
@@ -211,7 +212,7 @@ else {
         }
         else {
           $dbConnection->rollback(); // rollback otherwise
-          echo "SOMETHING WENT WRONG: ".$dbConnection->error.PHP_EOL;
+          echo "The data insert went wrong: ".$dbConnection->error.PHP_EOL;
         }
       }
       else {
