@@ -8,11 +8,12 @@ def output_val(number):
     else:
         return number
 
-for i in range(1,101):
+
+for i in range(1, 101):
     if i != 100:
         delimiter = ', '
         ending = ''
     else:
         delimiter = ''
         ending = '\n'
-    print(output_val(i),delimiter,sep='',end=ending)
+    print(output_val(i), delimiter, sep='', end=ending)
