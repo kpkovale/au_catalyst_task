@@ -24,38 +24,38 @@ For the latest version installation use `sudo apt update` or specify php version
 
 ## Assumptions for Command Line Directives:
 
-*   --file [file name]
-Current directive is required for every Script run. Exception: running with --help or --create_table directives.
-File name can be written both as in square brackets (example: `--file [users.csv]`), as without them (example: `--file users.csv`). Equality symbol "=" is also acceptable.   
-Example: `--file=filename` | `--file filename` | `--file [filename]`
-In a CSV file either ',' or ';' symbol should be used as a delimeter between fields. (One for the whole file)
+*   --file [file name]   
+     Current directive is required for every Script run. Exception: running with --help or --create_table directives.
+     File name can be written both as in square brackets (example: `--file [users.csv]`), as without them (example: `--file users.csv`). Equality symbol "=" is also acceptable.   
+     Example: `--file=filename` | `--file filename` | `--file [filename]`   
+     In a CSV file either ',' or ';' symbol should be used as a delimeter between fields. (One for the whole file)
 
-*   --create_table
-     To create "users" table in the database, the database or schema name with the `-n` directive should be given.
+*   --create_table   
+     To create "users" table in the database, the database or schema name with the `-n` directive should be given.   
      If the --create_table directive was given, the Script will terminate after successul creation or responce from the database that table with such name already exists, according to task conditions.
 
 *   --dry_run   
-     The dry run mode requires at least --file directive to be specified. Other directives are not necessary with --dry_run.
+     The dry run mode requires at least `--file` directive to be specified. Other directives are not necessary with --dry_run.
 
 *   --help   
-     The directive provides infromation for all acceptable commands for user_upload.php Script
+     The directive provides infromation for all acceptable commands for user_upload.php Script.
 
 Following database user details (directives) are configurable:
 *   -u   
-     MySQL username. Required for all Script executions except --dry_run and --help.
+     MySQL username. Required for all Script executions except --dry_run and --help.   
      Input example: `-u username` | `-u=username`   
 *   -p   
-     MySQL password. Required for all Script executions except --dry_run and --help.
+     MySQL password. Required for all Script executions except --dry_run and --help.   
      Input example: `-p` | `-p='password'`   
      In first condition, further password input will be requested during Script execution.
      Second case is possible, but recommended for localhost in a closed circuit network only, as BASH stores the commands in memory which creates vulnerabilities.   
 *   -h   
      MySQL host. Required for all Script executions except --dry_run and --help.
      Can be used in a format: "host:port" (example: -h localhost:3306) or host only (example: localhost).
-     If the port is not specified, default MySQL port as "null" will be set.
+     If the port is not specified, default MySQL port as "null" will be set.   
      Input example: `-h host` | `-h=host`
 *   -n   
-     MySQL database name. If not specified, "test" database name will be used.
+     MySQL database name. If not specified, "test" database name will be used.   
      Input example: `-n dbname` | `-n=dbname`
 
 Regardless of whether some DB-connection parameters (-u | -p | -h | -n) are specified or missing, the Script performs their check (if the connection to the DataBase required by conditions: not `--dry_run` or `--help`).
