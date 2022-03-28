@@ -41,5 +41,6 @@ const NEED_FILE_MESSAGE = "Script defined exception: File path or file name is r
 const USE_HELP_MESSAGE = "Use --help to check the list of available commands.".PHP_EOL;
 const TABLE_NOT_EXIST_MESSAGE = "There is no 'users' table in the specified database to insert data.
 Please create table first using --create_table parameter".PHP_EOL;
+const FILE_IS_EMPTY_MESSAGE = 'File is empty or has mismatching delimiters! Please, try another file. Terminating script'.PHP_EOL;
 
 ?>
