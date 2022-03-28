@@ -12,15 +12,15 @@ The following information is related to user_upload.php script (Script further i
 4. Database. The MYSQL database 8.0.28 version had been used during testing. Therefore v8 or higher is recommended to be installed.
 5. Database. According to task conditions, only "create table", "insert" and "select" operations are specified.
    Therefore at least one database on the host machine is reqiured.
-   5.1 For successul performance, a valid database or schema should be given with "-n" option.
+5.1 For successul performance, a valid database or schema should be given with "-n" option.
 6. Web-server. For successful PHP and Database interaction apache2 or nginx web-server is required.
 
 ### To install necessary components the below list of commands is recommended:
-- <sudo apt install php> - Enables php usage on current machine. You can use "<sudo apt show php>" to check the version link in your repository.
+- sudo apt install php - Enables php usage on current machine. You can use "sudo apt show php" to check the version link in your repository.
 For the latest version installation use "sudo apt update" or specify php version with "sudo apt install php7.4" command.
-- <sudo apt-get install php7.4-mysql> - Enables MySQL compatibility package for PHP
-- Apache2 web-server "<sudo apt-get install apache2>" or Nginx web-server "<sudo apt install nginx>"
-- <sudo apt install mysql-server> - Allows to install MySQL server on you local machine
+- sudo apt-get install php7.4-mysql - Enables MySQL compatibility package for PHP
+- Apache2 web-server "sudo apt-get install apache2" or Nginx web-server "sudo apt install nginx"
+- sudo apt install mysql-server - Allows to install MySQL server on you local machine
 
 ## Assumptions for Command Line Directives:
 
