@@ -52,7 +52,7 @@ Second case is possible, but recommended for localhost in a closed circuit netwo
 *   -h
 MySQL host. Required for all Script executions except --dry_run and --help.
 Can be used in a format: "host:port" (example: -h localhost:3306) or host only (example: localhost).
-If the port is not specified, default MySQL port 3306 will be set.
+If the port is not specified, default MySQL port as "null" will be set.
 Input example: `-h host` | `-h=host`
 *   -n
 MySQL database name. If not specified, "test" database name will be used.
