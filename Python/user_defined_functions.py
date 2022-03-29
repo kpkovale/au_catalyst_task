@@ -1,4 +1,5 @@
 import argparse
+import csv
 
 
 # Forms the available set of CLI commands and reads them from command line
@@ -36,3 +37,14 @@ def format_complex_name(stringVal):
         return resultString
     else:
         return stringVal.capitalize()
+
+
+# define csv delimiter
+def get_csv_delimiter(file):
+    reader = csv.reader(file)
+    if (next(reader)[0].find(";") != -1):
+        file.seek(0)
+        return ";"
+    else:
+        file.seek(0)
+        return ","
