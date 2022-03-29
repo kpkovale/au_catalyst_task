@@ -1,5 +1,7 @@
 import argparse
 
+
+# Forms the available set of CLI commands and reads them from command line
 def get_CLI_options(optionsArray):
     parser = argparse.ArgumentParser(conflict_handler='resolve')
     longoptGroup = parser.add_argument_group('List of general comand definitions')
@@ -18,3 +20,19 @@ def get_CLI_options(optionsArray):
     shortoptGroup.add_argument('-h', nargs="?", help="[host:port] – MySQL host")
     shortoptGroup.add_argument('-n', nargs="?", help="[DBName] – MySQL database name")
     return parser.parse_args(optionsArray)
+
+
+# Capitalizes simle and two-part names and surnames
+def format_complex_name(stringVal):
+    if stringVal.find("'") != -1:
+        delimterPos = stringVal.find("'")
+        resultString = "{}{}".format(stringVal[0:delimterPos+1].capitalize(),
+                                     stringVal[delimterPos+1:].capitalize())
+        return resultString
+    elif stringVal.find("-") != -1:
+        delimterPos = stringVal.find("-")
+        resultString = "{}{}".format(stringVal[0:delimterPos+1].capitalize(),
+                                     stringVal[delimterPos+1:].capitalize())
+        return resultString
+    else:
+        return stringVal.capitalize()
