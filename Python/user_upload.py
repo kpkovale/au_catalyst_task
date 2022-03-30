@@ -67,23 +67,30 @@ else:
         for row in resFile:
             if (row["email"] in (None, "")):
                 resFile.remove(row)
-
         # Processing emails
         validEmails = 0
         invalidEmails = 0
         emailPattern = re.compile("([a-zA-Z0-9!.'*~?{}_-]+@\w+\.[a-zA-Z0-9.]+)")
+        iterationCounter = 1
+        print("Rownum    | Message")
         for row in resFile:
             if (emailPattern.match(row["email"]) is not None):
                 row["email"] = emailPattern.match(row["email"]).group().lower()
                 row["is_valid"] = True
                 validEmails += 1
-                print("Valid email: {}".format(row["email"]))
+                print("{}:    Valid email: {}".format(iterationCounter,row["email"]))
             else:
                 row["is_valid"] = False
                 invalidEmails += 1
-                print("email {} is invalid".format(row["email"]))
+                print("{}:    email {} is invalid".format(iterationCounter,row["email"]))
+            iterationCounter += 1
         print("Valid emails: {}, invalid emails: {}".format(validEmails,
                                                             invalidEmails))
+        # remove records with invalid emails from the array
+        for row in resFile:
+            if row["is_valid"] == False:
+                resFile.remove(row)
+
         print("/* --- The file processing end. --- */")
 
 # checking DRY_RUN mode
@@ -123,8 +130,8 @@ try:
             print("/* --- Creating table ---*/")
             queryCreateTable = """ CREATE TABLE IF NOT EXISTS {}.users (
             id serial PRIMARY KEY NOT NULL,
-            u_name VARCHAR(50) NOT NULL,
-            u_surname VARCHAR(50) NOT NULL,
+            name VARCHAR(50) NOT NULL,
+            surname VARCHAR(50) NOT NULL,
             email VARCHAR(350) UNIQUE NOT NULL);""".format(connection.database)
             # sys.exit(queryCreateTable)
             with connection.cursor() as cursor:
@@ -143,5 +150,28 @@ try:
         # else: table exists, preparing insert
         else:
             print("Preparing INSERT")
+            insertQuery = """ INSERT INTO {}.users (name, surname, email)
+            VALUES (%(name)s,%(surname)s,%(email)s)""".format(
+                                connection.database)
+            cursor = connection.cursor()
+            insertRecordCount = 0
+            iterationCounter = 1
+            print("Rownum    | Message")
+            for row in resFile:
+                # print(check_email_exist(connection,row["email"]))
+                if (check_email_exist(connection,row["email"]) == []):
+                    cursor.execute(insertQuery, row)
+                    insertRecordCount += 1
+                    print("{}:    User with Email '{}' inserted into the database"
+                          .format(iterationCounter, row["email"]))
+                else:
+                    print("{}:    User with Email '{}' already exists"
+                          .format(iterationCounter, row["email"]))
+                iterationCounter += 1
+            connection.commit()
+            print("/* --- The script has been executed successfully.--- */\n"
+                  + "{} records inserted into the database"
+                  .format(insertRecordCount))
+            cursor.close()
 except mysql.connector.Error as e:
     print(e)
