@@ -109,9 +109,9 @@ def check_table_in_db(connection, dbName):
 
 # Returns values if email exists in table or None otherwise
 def check_email_exist(connection, email):
-    queryFindEmail = "SELECT email FROM {}.users WHERE email='{}';".format(
-                      connection.database, email)
+    queryFindEmail = "SELECT email FROM users WHERE email=%(email)s;"
     with connection.cursor() as cursor:
-        cursor.execute(queryFindEmail, [connection.database])
+        cursor.execute("USE " + connection.database + ";")
+        cursor.execute(queryFindEmail, {"email": email})
         selectResult = cursor.fetchall()
         return(selectResult)
