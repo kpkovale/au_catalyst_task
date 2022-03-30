@@ -4,7 +4,7 @@
 
 ## Information and requirements:
 1. Operating System. The Script execution has been checked on both OS Windows 10 and Ubuntu 18.04/20.04.
-2. Python version. For successul exectution, Python version 3.7 or above is required. (the same as in the task)
+2. Python version. For successul exectution, Python version 3.7 or above is required.
 3. Pyhon Libraries. MySQL compatibility package (MySQL connector) for Python is required:
   `python3 -m pip install mysql-connector-python`
 4. Database. The MYSQL database 8.0.28 version had been used during testing. Therefore v8 or higher is recommended to be installed.
@@ -24,7 +24,8 @@ For the latest version installation use `sudo apt update` or specify Python vers
 *   --file   
      Current directive is required for every Script run. Exception: running with --help or --create_table directives.   
      Example: `--file filename`   
-     In a CSV file either ',' or ';' symbol should be used as a delimeter between fields. (One for the whole file)
+     In a CSV file either ',' or ';' symbol should be used as a delimeter between fields. (One for the whole file)   
+     For current Python script, --file directive has a default value: `'../users.csv'` the way it is located on Git. That allows to aviod directory input for script tests during every runtime.
 
 *   --create_table   
      To create "users" table in the database, the database or schema name with the `-n` directive should be given.   
