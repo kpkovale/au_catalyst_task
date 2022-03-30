@@ -108,10 +108,40 @@ try:
         password=connParamsDict["Password"],
         database=connParamsDict["Database"]
     ) as connection:
-        print("Connection to the Databse '{}'".format(connection.database) +
-              " has been established succesfully")
-        # connection.close()
-        # with connection.cursor() as cursor:
-        #     cursor.execute()
+        print("Connection to the Databse '{}'".format(connection.database)
+              + " has been established succesfully")
+        usersTableExists = (check_table_in_db(connection,
+                            connection.database) != [])
+
+        # if --create_table was given but the table already exists
+        if ((arguments.create_table is not None) & usersTableExists):
+            sys.exit("Table 'users' already exists on '{}' schema".
+                     format(connection.database))
+
+        # else if --create_table was given and the table doesn't exist
+        elif ((arguments.create_table is not None) & (not usersTableExists)):
+            print("/* --- Creating table ---*/")
+            queryCreateTable = """ CREATE TABLE IF NOT EXISTS {}.users (
+            id serial PRIMARY KEY NOT NULL,
+            u_name VARCHAR(50) NOT NULL,
+            u_surname VARCHAR(50) NOT NULL,
+            email VARCHAR(350) UNIQUE NOT NULL);""".format(connection.database)
+            # sys.exit(queryCreateTable)
+            with connection.cursor() as cursor:
+                if (cursor.execute(queryCreateTable) is None):
+                    sys.exit(
+                        "Table 'users' on schema '{}' created successfully.".
+                        format(connection.database))
+
+        # if --create_table was not given (preparing insert)
+        # but the table does not exist
+        elif ((arguments.create_table is None) & (not usersTableExists)):
+            sys.exit("ATTENTION: There is no 'users' table "
+                     + "in the specified database to insert data.\n"
+                     + "           Please create table first "
+                     + "using --create_table parameter""")
+        # else: table exists, preparing insert
+        else:
+            print("Preparing INSERT")
 except mysql.connector.Error as e:
     print(e)
