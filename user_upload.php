@@ -165,8 +165,8 @@ if (isset($options[ "create_table" ])) {
     /* Forming a "create table" query */
     $queryCreateTable = "CREATE TABLE IF NOT EXISTS $dbName.users (
     id serial PRIMARY KEY NOT NULL,
-    u_name VARCHAR(50) NOT NULL,
-    u_surname VARCHAR(50) NOT NULL,
+    name VARCHAR(50) NOT NULL,
+    surname VARCHAR(50) NOT NULL,
     email VARCHAR(350) UNIQUE NOT NULL);";
 
     //executing CREATE TABLE query
@@ -202,7 +202,7 @@ else {
         $dbConnection->begin_transaction(); //STARTING TRANSACTION
 
         // preparing insert expression
-        $queryInsertUser = "INSERT INTO $dbName.users (u_name, u_surname, email)
+        $queryInsertUser = "INSERT INTO $dbName.users (name, surname, email)
         VALUES (\"$record[0]\",\"$record[1]\",\"$record[2]\")";
         // inserting data
         if ($dbConnection->query($queryInsertUser) === true) {
