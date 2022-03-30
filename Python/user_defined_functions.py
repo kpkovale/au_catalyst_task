@@ -1,5 +1,6 @@
 import argparse
 import csv
+from getpass import getpass
 
 
 # Forms the available set of CLI commands and reads them from command line
@@ -8,7 +9,7 @@ def get_CLI_options(optionsArray):
     longoptGroup = parser.add_argument_group('List of general comand definitions')
     longoptGroup.add_argument('--file', nargs="?",
                               help="Handles the CSV-file to be parsed.",
-                              default="users.csv")
+                              default="../users.csv")
     longoptGroup.add_argument('--create_table',  action='count',
                               help="This will cause the MySQL table to be built")
     longoptGroup.add_argument('--dry_run', action='count',
@@ -16,10 +17,14 @@ def get_CLI_options(optionsArray):
                                    + "won't be altered")
     shortoptGroup = parser.add_argument_group('DB connection parameters',
                         "BASH input for the following commands can be omitted")
-    shortoptGroup.add_argument('-u', nargs="?", help="[username] – MySQL username")
-    shortoptGroup.add_argument('-p', nargs="?", help="[password] – MySQL password")
-    shortoptGroup.add_argument('-h', nargs="?", help="[host:port] – MySQL host")
-    shortoptGroup.add_argument('-n', nargs="?", help="[DBName] – MySQL database name")
+    shortoptGroup.add_argument('-u', nargs="?",
+                               help="[username] – MySQL username")
+    shortoptGroup.add_argument('-p', nargs="?",
+                               help="[password] – MySQL password")
+    shortoptGroup.add_argument('-h', nargs="?",
+                               help="[host:port] – MySQL host")
+    shortoptGroup.add_argument('-n', nargs="?",
+                               help="[DBName] – MySQL database name")
     return parser.parse_args(optionsArray)
 
 
@@ -48,3 +53,45 @@ def get_csv_delimiter(file):
     else:
         file.seek(0)
         return ","
+
+
+# checks DB connection parameters and requests user input if
+# parameter value is not set
+def get_dbconnection_params(parser, argNames):
+    inputMessage = "Value '{}' is not set. Enter"
+    resParamsDict = dict()
+    for argument in argNames:
+        if ((parser.__getattribute__(argument) is None) & (argument != "p")):
+            resParamsDict[decode_shortopts_names(argument)] = input(
+                    inputMessage.format(
+                        decode_shortopts_names(argument))+": ")
+        elif ((parser.__getattribute__(argument) is None) & (argument == "p")):
+            resParamsDict[decode_shortopts_names(argument)] = getpass(
+                    inputMessage.format(
+                        decode_shortopts_names(argument))+": ")
+        else:
+            resParamsDict[decode_shortopts_names(
+                    argument)] = parser.__getattribute__(argument)
+    return resParamsDict
+
+
+# decode shortopts names
+def decode_shortopts_names(option):
+    if option == "u":
+        return "Username"
+    if option == "p":
+        return "Password"
+    if option == "h":
+        return "Host"
+    else:
+        return "Database"
+
+
+# split "host:port" format into separate host & port values
+def get_host_port_split(hostPort):
+    if (hostPort.find(":") != -1):
+        return ({"Host": hostPort.split(":")[0],
+                "Port": hostPort.split(":")[1]})
+    else:
+        return ({"Host": hostPort,
+                "Port": ""})
