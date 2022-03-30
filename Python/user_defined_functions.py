@@ -95,3 +95,23 @@ def get_host_port_split(hostPort):
     else:
         return ({"Host": hostPort,
                 "Port": ""})
+
+
+# Returns table_name if the table exists or None otherwise
+def check_table_in_db(connection, dbName):
+    queryFindTable = """SELECT table_name FROM information_schema.tables
+                     WHERE table_schema=%s AND table_name='users';"""
+    with connection.cursor() as cursor:
+        cursor.execute(queryFindTable, [dbName])
+        selectResult = cursor.fetchall()
+        return(selectResult)
+
+
+# Returns values if email exists in table or None otherwise
+def check_email_exist(connection, email):
+    queryFindEmail = "SELECT email FROM {}.users WHERE email='{}';".format(
+                      connection.database, email)
+    with connection.cursor() as cursor:
+        cursor.execute(queryFindEmail, [connection.database])
+        selectResult = cursor.fetchall()
+        return(selectResult)
