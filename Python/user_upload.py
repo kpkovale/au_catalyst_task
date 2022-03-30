@@ -3,7 +3,7 @@ from user_defined_functions import *
 import csv
 import os.path
 import re
-from email.utils import parseaddr
+import mysql.connector
 
 # Collecting the list of arguments
 arguments = get_CLI_options(sys.argv[1:])
@@ -19,8 +19,10 @@ else:
 NEED_FILE_MESSAGE = """Script defined exception: File path or file name is required.
 Please restart the script using correct parameters"""
 
-if arguments.create_table is None:
-    print("!***! --create_table option was not given. Starting the file processing")
+if (arguments.create_table is not None):
+    print("/* --- --create_table option has been given. Skip file processig. --- */")
+else:
+    print("/* --- Starting the file processing --- */")
     if arguments.file is None:
         sys.exit(NEED_FILE_MESSAGE)
     elif not os.path.exists(arguments.file):
@@ -82,4 +84,34 @@ if arguments.create_table is None:
                 print("email {} is invalid".format(row["email"]))
         print("Valid emails: {}, invalid emails: {}".format(validEmails,
                                                             invalidEmails))
-        print("!***! The file processing has been finished successfully.")
+        print("/* --- The file processing end. --- */")
+
+# checking DRY_RUN mode
+if isDryRun:
+    sys.exit("The script has been executed successfully.\n" +
+             "The amount of valid user records prepared" +
+             "to be inserted into the database is: {}".format(validEmails))
+
+# Checking the connection parameters and requesting user input if required
+connParamsDict = get_dbconnection_params(arguments, ["u", "p", "h", "n"])
+
+# Checking "host" format as "host:port" or "host" only and assigning values
+connParamsDict.update(get_host_port_split(connParamsDict["Host"]))
+
+# Establishing the DB connection
+try:
+    print("/* --- Establishing MySQL DB connection. --- */")
+    with mysql.connector.connect(
+        host=connParamsDict["Host"],
+        port=connParamsDict["Port"],
+        user=connParamsDict["Username"],
+        password=connParamsDict["Password"],
+        database=connParamsDict["Database"]
+    ) as connection:
+        print("Connection to the Databse '{}'".format(connection.database) +
+              " has been established succesfully")
+        # connection.close()
+        # with connection.cursor() as cursor:
+        #     cursor.execute()
+except mysql.connector.Error as e:
+    print(e)
